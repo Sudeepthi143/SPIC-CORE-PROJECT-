@@ -1,0 +1,72 @@
+const generatePPT = async () => {
+  if (!pptTitle.trim()) {
+    setMessage("Please enter a title for your presentation.");
+    return;
+  }
+
+  if (images.length === 0) {
+    setMessage("Please upload at least one image.");
+    return;
+  }
+
+  if (!slideCount) {
+    setMessage("Please select the number of slides.");
+    return;
+  }
+
+  setMessage("Generating your PowerPoint presentation...");
+
+  try {
+    const formData = new FormData();
+
+    // PPT title
+    formData.append("title", pptTitle);
+
+    // EXACT number of slides requested by user
+    formData.append("slide_count", slideCount);
+
+    // Upload images
+    images.forEach((image) => {
+      formData.append("images", image.file);
+    });
+
+    const response = await fetch(
+      "http://localhost:5000/api/generate-ppt",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("PPT generation failed");
+    }
+
+    // Receive generated PPT file
+    const blob = await response.blob();
+
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${pptTitle}.pptx`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    setMessage(
+      `Successfully generated "${pptTitle}" with ${slideCount} slides!`
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    setMessage(
+      "Unable to generate the PowerPoint. Please try again."
+    );
+  }
+};
