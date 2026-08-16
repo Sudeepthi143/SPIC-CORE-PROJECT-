@@ -1,0 +1,401 @@
+import { useState } from "react";
+
+function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setMessage("Please enter your email and password.");
+      return;
+    }
+
+    setMessage("Login successful!");
+  };
+
+  return (
+    <>
+      <style>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+          background: #f4f7fb;
+        }
+
+        .login-page {
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 30px;
+          background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        }
+
+        .login-container {
+          width: 100%;
+          max-width: 1050px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          background: white;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-section {
+          padding: 70px 55px;
+          background: linear-gradient(135deg, #4f46e5, #7c3aed);
+          color: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .logo {
+          width: 65px;
+          height: 65px;
+          border-radius: 16px;
+          background: white;
+          color: #4f46e5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 25px;
+          font-weight: bold;
+          margin-bottom: 25px;
+        }
+
+        .brand-section h1 {
+          font-size: 38px;
+          margin-bottom: 18px;
+        }
+
+        .brand-section p {
+          font-size: 17px;
+          line-height: 1.7;
+          max-width: 420px;
+          opacity: 0.9;
+        }
+
+        .features {
+          margin-top: 30px;
+        }
+
+        .features p {
+          margin-bottom: 12px;
+          font-size: 15px;
+        }
+
+        .login-card {
+          padding: 55px 50px;
+        }
+
+        .login-card h2 {
+          font-size: 30px;
+          color: #111827;
+          margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+          color: #6b7280;
+          margin-bottom: 32px;
+        }
+
+        .input-group {
+          margin-bottom: 20px;
+        }
+
+        .input-group label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        .input-group input {
+          width: 100%;
+          padding: 14px 15px;
+          border: 1px solid #d1d5db;
+          border-radius: 9px;
+          font-size: 15px;
+          outline: none;
+          transition: 0.2s;
+        }
+
+        .input-group input:focus {
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .password-box {
+          position: relative;
+        }
+
+        .password-box input {
+          padding-right: 70px;
+        }
+
+        .show-btn {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: none;
+          background: transparent;
+          color: #4f46e5;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .login-options {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 18px 0 25px;
+          font-size: 13px;
+        }
+
+        .remember {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: #4b5563;
+        }
+
+        .login-options a,
+        .signup-text a {
+          color: #4f46e5;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .login-btn {
+          width: 100%;
+          padding: 14px;
+          border: none;
+          border-radius: 9px;
+          background: #4f46e5;
+          color: white;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+
+        .login-btn:hover {
+          background: #4338ca;
+        }
+
+        .message {
+          margin-top: 15px;
+          text-align: center;
+          color: #4f46e5;
+          font-weight: 600;
+          font-size: 14px;
+        }
+
+        .divider {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin: 30px 0;
+          color: #9ca3af;
+          font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+          content: "";
+          height: 1px;
+          flex: 1;
+          background: #e5e7eb;
+        }
+
+        .signup-text {
+          text-align: center;
+          color: #6b7280;
+          font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+          .login-container {
+            grid-template-columns: 1fr;
+          }
+
+          .brand-section {
+            padding: 40px 30px;
+          }
+
+          .brand-section h1 {
+            font-size: 30px;
+          }
+
+          .login-card {
+            padding: 40px 30px;
+          }
+        }
+      `}</style>
+
+      <div className="login-page">
+
+        <div className="login-container">
+
+          {/* LEFT SIDE */}
+          <div className="brand-section">
+
+            <div className="logo">
+              AI
+            </div>
+
+            <h1>
+              AI PPT Generator
+            </h1>
+
+            <p>
+              Create professional PowerPoint presentations
+              automatically from your images using Artificial
+              Intelligence.
+            </p>
+
+            <div className="features">
+              <p>✓ Upload your images</p>
+              <p>✓ AI-powered image analysis</p>
+              <p>✓ Automatic slide generation</p>
+              <p>✓ Download professional PPT</p>
+            </div>
+
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="login-card">
+
+            <h2>
+              Welcome Back
+            </h2>
+
+            <p className="login-subtitle">
+              Login to continue to your dashboard
+            </p>
+
+            <form onSubmit={handleLogin}>
+
+              {/* EMAIL */}
+              <div className="input-group">
+
+                <label>
+                  Email Address
+                </label>
+
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+              </div>
+
+              {/* PASSWORD */}
+              <div className="input-group">
+
+                <label>
+                  Password
+                </label>
+
+                <div className="password-box">
+
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="show-btn"
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+
+                </div>
+
+              </div>
+
+              {/* OPTIONS */}
+              <div className="login-options">
+
+                <label className="remember">
+
+                  <input type="checkbox" />
+
+                  Remember me
+
+                </label>
+
+                <a
+                  href="#"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  Forgot Password?
+                </a>
+
+              </div>
+
+              {/* LOGIN BUTTON */}
+              <button
+                type="submit"
+                className="login-btn"
+              >
+                Login
+              </button>
+
+            </form>
+
+            {/* MESSAGE */}
+            {message && (
+              <div className="message">
+                {message}
+              </div>
+            )}
+
+            <div className="divider">
+              <span>OR</span>
+            </div>
+
+            <p className="signup-text">
+
+              Don't have an account?{" "}
+
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+              >
+                Create Account
+              </a>
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+    </>
+  );
+}
+
+export default App;
