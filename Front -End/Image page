@@ -1,0 +1,684 @@
+import { useState } from "react";
+
+function App() {
+  const [images, setImages] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleFiles = (files) => {
+    const selectedFiles = Array.from(files).filter((file) =>
+      file.type.startsWith("image/")
+    );
+
+    if (selectedFiles.length === 0) {
+      setMessage("Please select valid image files.");
+      return;
+    }
+
+    const newImages = selectedFiles.map((file) => ({
+      file: file,
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+
+    setImages((prev) => [...prev, ...newImages]);
+    setMessage("");
+  };
+
+  const handleFileChange = (e) => {
+    handleFiles(e.target.files);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const removeImage = (index) => {
+    setImages((prev) => {
+      URL.revokeObjectURL(prev[index].url);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const clearAll = () => {
+    images.forEach((image) => {
+      URL.revokeObjectURL(image.url);
+    });
+
+    setImages([]);
+    setMessage("");
+  };
+
+  const generatePPT = () => {
+    if (images.length === 0) {
+      setMessage("Please upload at least one image first.");
+      return;
+    }
+
+    setMessage(
+      `Ready to generate PPT from ${images.length} image${
+        images.length > 1 ? "s" : ""
+      }.`
+    );
+
+    // Later connect this button to your AI/PPT backend API.
+  };
+
+  return (
+    <>
+      <style>{`
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: Arial, Helvetica, sans-serif;
+          background: #f4f7fb;
+        }
+
+        .dashboard {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #eef2ff, #f8fafc);
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+          height: 72px;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 45px;
+          border-bottom: 1px solid #e5e7eb;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .logo {
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          background: linear-gradient(
+            135deg,
+            #4f46e5,
+            #7c3aed
+          );
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 18px;
+        }
+
+        .brand-name {
+          font-size: 20px;
+          font-weight: 700;
+          color: #111827;
+        }
+
+        .user-section {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .user-name {
+          color: #374151;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .profile {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          background: #4f46e5;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-weight: bold;
+        }
+
+        /* MAIN */
+
+        .main-content {
+          max-width: 1100px;
+          margin: auto;
+          padding: 50px 30px;
+        }
+
+        .heading {
+          text-align: center;
+          margin-bottom: 35px;
+        }
+
+        .heading h1 {
+          font-size: 34px;
+          color: #111827;
+          margin-bottom: 12px;
+        }
+
+        .heading p {
+          color: #6b7280;
+          font-size: 16px;
+        }
+
+        /* UPLOAD CARD */
+
+        .upload-card {
+          background: white;
+          border-radius: 18px;
+          padding: 35px;
+          box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .upload-box {
+          border: 2px dashed #c7d2fe;
+          border-radius: 15px;
+          padding: 55px 25px;
+          text-align: center;
+          background: #fafaff;
+          transition: 0.2s;
+        }
+
+        .upload-box.active {
+          border-color: #4f46e5;
+          background: #eef2ff;
+        }
+
+        .upload-icon {
+          width: 70px;
+          height: 70px;
+          margin: auto;
+          border-radius: 50%;
+          background: #eef2ff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 32px;
+          margin-bottom: 20px;
+        }
+
+        .upload-box h2 {
+          color: #111827;
+          font-size: 22px;
+          margin-bottom: 10px;
+        }
+
+        .upload-box p {
+          color: #6b7280;
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .browse-btn {
+          display: inline-block;
+          padding: 12px 25px;
+          background: #4f46e5;
+          color: white;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+
+        .browse-btn:hover {
+          background: #4338ca;
+        }
+
+        .browse-btn input {
+          display: none;
+        }
+
+        .file-info {
+          margin-top: 15px;
+          color: #9ca3af;
+          font-size: 12px;
+        }
+
+        /* IMAGE PREVIEW */
+
+        .preview-section {
+          margin-top: 35px;
+        }
+
+        .preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 18px;
+        }
+
+        .preview-header h2 {
+          font-size: 20px;
+          color: #111827;
+        }
+
+        .clear-btn {
+          border: none;
+          background: #fee2e2;
+          color: #dc2626;
+          padding: 8px 14px;
+          border-radius: 7px;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .image-grid {
+          display: grid;
+          grid-template-columns: repeat(
+            auto-fill,
+            minmax(160px, 1fr)
+          );
+          gap: 18px;
+        }
+
+        .image-card {
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .image-card img {
+          width: 100%;
+          height: 150px;
+          object-fit: cover;
+          display: block;
+        }
+
+        .image-name {
+          padding: 10px;
+          font-size: 12px;
+          color: #4b5563;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .remove-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 28px;
+          height: 28px;
+          border: none;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.95);
+          color: #dc2626;
+          font-size: 17px;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        /* GENERATE */
+
+        .generate-section {
+          margin-top: 35px;
+          text-align: center;
+        }
+
+        .generate-btn {
+          width: 100%;
+          max-width: 400px;
+          padding: 15px 25px;
+          border: none;
+          border-radius: 10px;
+          background: linear-gradient(
+            135deg,
+            #4f46e5,
+            #7c3aed
+          );
+          color: white;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: 0.2s;
+        }
+
+        .generate-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+        }
+
+        .generate-btn:disabled {
+          background: #c7c9d9;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .message {
+          margin-top: 18px;
+          text-align: center;
+          color: #4f46e5;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        /* INFO */
+
+        .info-section {
+          margin-top: 30px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 18px;
+        }
+
+        .info-card {
+          background: white;
+          padding: 20px;
+          border-radius: 12px;
+          text-align: center;
+          border: 1px solid #e5e7eb;
+        }
+
+        .info-card span {
+          font-size: 25px;
+        }
+
+        .info-card h3 {
+          margin-top: 10px;
+          font-size: 15px;
+          color: #111827;
+        }
+
+        .info-card p {
+          margin-top: 6px;
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 768px) {
+
+          .navbar {
+            padding: 0 20px;
+          }
+
+          .user-name {
+            display: none;
+          }
+
+          .main-content {
+            padding: 35px 18px;
+          }
+
+          .heading h1 {
+            font-size: 28px;
+          }
+
+          .upload-card {
+            padding: 20px;
+          }
+
+          .upload-box {
+            padding: 40px 15px;
+          }
+
+          .info-section {
+            grid-template-columns: 1fr;
+          }
+
+        }
+
+      `}</style>
+
+      <div className="dashboard">
+
+        {/* NAVBAR */}
+
+        <nav className="navbar">
+
+          <div className="brand">
+
+            <div className="logo">
+              AI
+            </div>
+
+            <div className="brand-name">
+              AI PPT Generator
+            </div>
+
+          </div>
+
+          <div className="user-section">
+
+            <span className="user-name">
+              Welcome, User
+            </span>
+
+            <div className="profile">
+              U
+            </div>
+
+          </div>
+
+        </nav>
+
+        {/* MAIN CONTENT */}
+
+        <main className="main-content">
+
+          <div className="heading">
+
+            <h1>
+              Create Your Presentation
+            </h1>
+
+            <p>
+              Upload your images and let AI create a
+              professional PowerPoint presentation for you.
+            </p>
+
+          </div>
+
+          <div className="upload-card">
+
+            {/* UPLOAD AREA */}
+
+            <div
+              className={`upload-box ${
+                dragActive ? "active" : ""
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+
+              <div className="upload-icon">
+                🖼️
+              </div>
+
+              <h2>
+                Upload Your Images
+              </h2>
+
+              <p>
+                Drag and drop your images here or click
+                the button below
+              </p>
+
+              <label className="browse-btn">
+
+                Browse Images
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                />
+
+              </label>
+
+              <div className="file-info">
+                Supported formats: JPG, JPEG, PNG, WEBP
+              </div>
+
+            </div>
+
+            {/* IMAGE PREVIEW */}
+
+            {images.length > 0 && (
+
+              <div className="preview-section">
+
+                <div className="preview-header">
+
+                  <h2>
+                    Selected Images ({images.length})
+                  </h2>
+
+                  <button
+                    className="clear-btn"
+                    onClick={clearAll}
+                  >
+                    Clear All
+                  </button>
+
+                </div>
+
+                <div className="image-grid">
+
+                  {images.map((image, index) => (
+
+                    <div
+                      className="image-card"
+                      key={index}
+                    >
+
+                      <img
+                        src={image.url}
+                        alt={image.name}
+                      />
+
+                      <button
+                        className="remove-btn"
+                        onClick={() =>
+                          removeImage(index)
+                        }
+                      >
+                        ×
+                      </button>
+
+                      <div className="image-name">
+                        {image.name}
+                      </div>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              </div>
+
+            )}
+
+            {/* GENERATE BUTTON */}
+
+            <div className="generate-section">
+
+              <button
+                className="generate-btn"
+                onClick={generatePPT}
+                disabled={images.length === 0}
+              >
+                ✨ Generate PowerPoint
+              </button>
+
+              {message && (
+                <div className="message">
+                  {message}
+                </div>
+              )}
+
+            </div>
+
+          </div>
+
+          {/* INFORMATION CARDS */}
+
+          <div className="info-section">
+
+            <div className="info-card">
+
+              <span>📤</span>
+
+              <h3>
+                Upload Images
+              </h3>
+
+              <p>
+                Select one or multiple images
+                for your presentation.
+              </p>
+
+            </div>
+
+            <div className="info-card">
+
+              <span>🤖</span>
+
+              <h3>
+                AI Processing
+              </h3>
+
+              <p>
+                AI analyzes your images and
+                creates suitable slide content.
+              </p>
+
+            </div>
+
+            <div className="info-card">
+
+              <span>📊</span>
+
+              <h3>
+                Generate PPT
+              </h3>
+
+              <p>
+                Convert your images into a
+                professional PowerPoint.
+              </p>
+
+            </div>
+
+          </div>
+
+        </main>
+
+      </div>
+    </>
+  );
+}
+
+export default App;
